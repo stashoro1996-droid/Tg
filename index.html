@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Super Tapper 2026</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            background: radial-gradient(circle, #1e1e2f, #111119);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            overflow: hidden; /* Чтобы экран не дергался */
+            user-select: none;
+        }
+        .header { margin-top: 50px; }
+        #score { font-size: 48px; font-weight: bold; text-shadow: 0 0 20px #0088cc; }
+        
+        /* Главная кнопка-тапалка */
+        .tap-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 40px;
+        }
+        #coin {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #ffcc00, #ffaa00);
+            border-radius: 50%;
+            border: 8px solid #fff;
+            box-shadow: 0 0 50px rgba(255, 204, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        #coin:active { transform: scale(0.95); }
+
+        /* Вылетающая цифра +1 */
+        .floating-text {
+            position: absolute;
+            color: #00ff00;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: moveUp 0.8s ease-out forwards;
+        }
+        @keyframes moveUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+
+        /* Прогресс-бар */
+        .progress-container {
+            width: 80%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            margin: 40px auto;
+            overflow: hidden;
+        }
+        #progress {
+            width: 0%;
+            height: 100%;
+            background: #0088cc;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>Твои коины:</div>
+        <div id="score">0</div>
+    </div>
+
+    <div class="tap-container" id="tapZone">
+        <div id="coin" onclick="handleTap(event)"></div>
+    </div>
+
+    <div class="progress-container">
+        <div id="progress"></div>
+    </div>
+    <div id="lvl-text">Уровень 1</div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let score = 0;
+        let progress = 0;
+        let lvl = 1;
+
+        function handleTap(event) {
+            score++;
+            progress += 5; // На сколько заполняется полоска за клик
+
+            // Обновляем текст
+            document.getElementById('score').innerText = score;
+
+            // Логика уровней
+            if (progress >= 100) {
+                progress = 0;
+                lvl++;
+                document.getElementById('lvl-text').innerText = "Уровень " + lvl;
+                tg.HapticFeedback.notificationOccurred('success'); // Вибрация
+            }
+            document.getElementById('progress').style.width = progress + "%";
+
+            // Создаем вылетающий текст "+1"
+            createFloatingText(event.clientX, event.clientY);
+        }
+
+        function createFloatingText(x, y) {
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.innerText = '+1';
+            text.style.left = x + 'px';
+            text.style.top = y + 'px';
+            document.body.appendChild(text);
+
+            setTimeout(() => text.remove(), 800);
+        }
+    </script>
+</body>
+</html>
