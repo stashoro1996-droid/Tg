@@ -3,226 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Crypto Empire 2026</title>
+    <title>Crypto Empire Pro</title>
     <script src="https://telegram.org"></script>
     <style>
-        :root {
-            --main-color: #f3ba2f;
-            --bg-color: #0b0e11;
-            --card-bg: #1e2329;
-            --text-gray: #929aa5;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Шапка */
-        .header {
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(to bottom, rgba(243, 186, 47, 0.1), transparent);
-        }
-
-        .rank { color: var(--main-color); font-size: 14px; font-weight: bold; letter-spacing: 1px; }
+        :root { --main-color: #f3ba2f; --bg-color: #0b0e11; --card-bg: #1e2329; }
+        body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .header { padding: 20px; text-align: center; background: linear-gradient(to bottom, rgba(243,186,47,0.1), transparent); }
+        .rank { color: var(--main-color); font-size: 14px; font-weight: bold; }
         .balance-container { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px; }
-        .balance-container img { width: 40px; height: 40px; }
         #score { font-size: 42px; font-weight: 800; }
-
-        /* Игровая зона */
-        .game-zone {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .coin-button {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            cursor: pointer;
-            transition: transform 0.05s;
-        }
-
+        .game-zone { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .coin-button { width: 260px; height: 260px; cursor: pointer; transition: transform 0.05s; }
         .coin-button:active { transform: scale(0.95); }
-
-        .coin-svg {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 20px rgba(243, 186, 47, 0.4));
-        }
-
-        /* Энергия */
-        .energy-container {
-            width: 80%;
-            margin-bottom: 40px;
-        }
-
+        .energy-container { width: 80%; margin: 0 auto 40px auto; }
         .energy-text { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 18px; font-weight: bold; }
-        .energy-bar {
-            width: 100%;
-            height: 12px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        #energy-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #f3ba2f, #ffea00);
-            transition: width 0.1s;
-        }
-
-        /* Нижнее меню */
-        .nav-bar {
-            display: flex;
-            background: var(--card-bg);
-            padding: 10px 0 25px 0;
-            border-top: 1px solid #333;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            color: var(--text-gray);
-            font-size: 12px;
-        }
-
+        .energy-bar { width: 100%; height: 12px; background: #333; border-radius: 10px; overflow: hidden; }
+        #energy-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #f3ba2f, #ffea00); transition: width 0.1s; }
+        .nav-bar { display: flex; background: var(--card-bg); padding: 10px 0 25px 0; border-top: 1px solid #333; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; color: #929aa5; font-size: 12px; }
         .nav-item.active { color: var(--main-color); }
-        .nav-icon { font-size: 20px; }
-
-        /* Анимация клика */
-        .tap-anim {
-            position: absolute;
-            color: white;
-            font-size: 32px;
-            font-weight: 900;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) opacity(1); }
-            100% { transform: translateY(-150px) opacity(0); }
-        }
+        .tap-anim { position: absolute; color: white; font-size: 35px; font-weight: 900; pointer-events: none; animation: floatUp 0.7s ease-out forwards; z-index: 100; text-shadow: 0 0 10px rgba(243,186,47,1); }
+        @keyframes floatUp { 0% { transform: translateY(0) opacity: 1; } 100% { transform: translateY(-150px) opacity: 0; } }
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="rank" id="rank-name">BRONZE LEAGUE</div>
         <div class="balance-container">
-            <svg width="30" height="30" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#f3ba2f""")/>><path d="M12 8l8 8-8 8" fill="none" stroke="white" stroke-width="3""")/>></svg>
+            <span style="font-size: 30px;">🟡</span>
             <span id="score">0</span>
         </div>
     </div>
-
     <div class="game-zone">
         <div class="coin-button" id="coin">
-            <svg class="coin-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="#f3ba2f" stroke="#d4a017" stroke-width="5""")/>>
-                <circle cx="50" cy="50" r="35" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5,5""")/>>
-                <text x="50" y="65" font-family="Arial" font-size="40" text-anchor="middle" fill="white">₿</text>
-            </svg>
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#f3ba2f" stroke="#d4a017" stroke-width="5""")/>><text x="50" y="65" font-family="Arial" font-size="40" text-anchor="middle" fill="white">₿</text></svg>
         </div>
     </div>
-
     <div class="energy-container">
-        <div class="energy-text">
-            <span>⚡ <span id="energy-val">1000</span></span>
-            <span>/ 1000</span>
-        </div>
-        <div class="energy-bar">
-            <div id="energy-fill"></div>
-        </div>
+        <div class="energy-text"><span>⚡ <span id="energy-val">1000</span></span><span>/ 1000</span></div>
+        <div class="energy-bar"><div id="energy-fill"></div></div>
     </div>
-
     <nav class="nav-bar">
-        <div class="nav-item active"><span class="nav-icon">🎮</span><span>Игра</span></div>
-        <div class="nav-item"><span class="nav-icon">💎</span><span>Задания</span></div>
-        <div class="nav-item"><span class="nav-icon">👥</span><span>Друзья</span></div>
-        <div class="nav-item"><span class="nav-icon">🚀</span><span>Бусты</span></div>
+        <div class="nav-item active"><span>🎮</span><span>Игра</span></div>
+        <div class="nav-item"><span>💎</span><span>Задания</span></div>
+        <div class="nav-item"><span>👥</span><span>Друзья</span></div>
+        <div class="nav-item"><span>🚀</span><span>Бусты</span></div>
     </nav>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        let score = 0;
-        let energy = 1000;
+        // Загрузка данных или значения по умолчанию
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        let energy = parseInt(localStorage.getItem('energy')) || 1000;
         const maxEnergy = 1000;
 
-        const scoreEl = document.getElementById('score');
-        const energyEl = document.getElementById('energy-val');
-        const energyFill = document.getElementById('energy-fill');
-        const coin = document.getElementById('coin');
+        function updateUI() {
+            document.getElementById('score').innerText = score.toLocaleString();
+            document.getElementById('energy-val').innerText = energy;
+            document.getElementById('energy-fill').style.width = (energy / maxEnergy * 100) + '%';
+            if (score > 500) document.getElementById('rank-name').innerText = "SILVER LEAGUE";
+            if (score > 2000) document.getElementById('rank-name').innerText = "GOLD LEAGUE";
+        }
 
-        // Клик по монете
-        coin.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Защита от зума
-            
+        function saveData() {
+            localStorage.setItem('score', score);
+            localStorage.setItem('energy', energy);
+        }
+
+        document.getElementById('coin').addEventListener('touchstart', (e) => {
+            e.preventDefault();
             if (energy > 0) {
-                // Обработка нескольких пальцев
                 for (let i = 0; i < e.touches.length; i++) {
                     if (energy <= 0) break;
-                    
-                    score++;
-                    energy--;
-                    
-                    updateUI();
+                    score++; energy--;
                     createTapAnim(e.touches[i].clientX, e.touches[i].clientY);
-                    
-                    // Вибрация
-                    tg.HapticFeedback.impactOccurred('medium');
                 }
-            } else {
-                tg.HapticFeedback.notificationOccurred('error');
+                updateUI();
+                saveData();
+                tg.HapticFeedback.impactOccurred('medium');
             }
         });
 
-        function updateUI() {
-            scoreEl.innerText = score.toLocaleString();
-            energyEl.innerText = energy;
-            energyFill.style.width = (energy / maxEnergy * 100) + '%';
-            
-            // Смена рангов
-            if (score > 100) document.getElementById('rank-name').innerText = "SILVER LEAGUE";
-            if (score > 500) document.getElementById('rank-name').innerText = "GOLD LEAGUE";
-        }
-
         function createTapAnim(x, y) {
             const div = document.createElement('div');
-            div.className = 'tap-anim';
-            div.innerText = '+1';
-            div.style.left = x + 'px';
-            div.style.top = y + 'px';
+            div.className = 'tap-anim'; div.innerText = '+1';
+            div.style.left = x + 'px'; div.style.top = y + 'px';
             document.body.appendChild(div);
-            setTimeout(() => div.remove(), 800);
+            setTimeout(() => div.remove(), 700);
         }
 
-        // Регенерация энергии
         setInterval(() => {
             if (energy < maxEnergy) {
-                energy++;
-                updateUI();
+                energy++; updateUI(); saveData();
             }
-        }, 1000);
+        }, 1500);
+
+        updateUI();
     </script>
 </body>
 </html>
