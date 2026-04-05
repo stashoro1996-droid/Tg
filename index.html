@@ -1,41 +1,43 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BitClick Hardcore</title>
+    <title>BitClick Hardcore Elite</title>
     <script src="https://telegram.org"></script>
     <script src="https://jsdelivr.net"></script>
     <style>
-        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
+        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; --card: #111; --crit: #ff4500; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; user-select: none; touch-action: manipulation; }
         
-        .header { padding: 12px; text-align: center; color: var(--gold); font-weight: 800; font-size: 12px; letter-spacing: 1px; }
-        .score-container { font-size: 44px; font-weight: 900; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .header { padding: 12px; text-align: center; color: var(--gold); font-weight: 800; font-size: 13px; text-transform: uppercase; }
+        .score-container { font-size: 38px; font-weight: 900; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        .page { display: none; flex-direction: column; align-items: center; height: 82vh; padding: 20px; overflow-y: auto; }
+        .page { display: none; flex-direction: column; align-items: center; height: 82vh; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .active-page { display: flex; }
 
-        /* Монета */
-        .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; perspective: 1000px; position: relative; }
-        .coin-card { width: 250px; height: 250px; transition: transform 0.1s; transform-style: preserve-3d; }
-        .coin-img { width: 100%; filter: drop-shadow(0 0 30px rgba(243, 186, 47, 0.3)); pointer-events: none; }
+        .coin-card { width: 230px; height: 230px; transition: transform 0.05s; margin: auto; position: relative; }
+        .coin-card:active { transform: scale(0.90); }
+        .coin-img { width: 100%; pointer-events: none; filter: drop-shadow(0 0 30px rgba(243, 186, 47, 0.4)); }
 
-        /* Магазин и Stars */
-        .list-item { background: #111; padding: 15px; margin: 6px 0; border-radius: 18px; width: 100%; max-width: 340px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; }
-        .item-info b { display: block; color: var(--gold); font-size: 15px; }
-        .item-info small { color: #666; font-size: 11px; }
+        /* Эффекты тапа */
+        .tap-msg { position: fixed; font-weight: 900; pointer-events: none; z-index: 100; animation: floatUp 0.7s forwards; }
+        .crit-msg { color: var(--gold); font-size: 40px; text-shadow: 0 0 15px var(--crit); }
+
+        .premium-card { background: linear-gradient(135deg, #111, #0a1520); border: 1px solid var(--star); padding: 15px; border-radius: 20px; width: 100%; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         
-        .btn-buy { background: var(--gold); color: #000; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; font-size: 12px; }
-        .btn-stars { background: var(--star); color: #fff; padding: 10px 14px; border-radius: 10px; font-weight: 800; border: none; display: flex; align-items: center; gap: 4px; }
+        .btn-buy { background: var(--gold); color: #000; padding: 10px 16px; border-radius: 12px; font-weight: 800; border: none; min-width: 80px; }
+        .btn-star { background: var(--star); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 800; border: none; display: flex; align-items: center; gap: 4px; }
 
-        .energy-box { width: 85%; padding-bottom: 40px; }
-        .energy-bar { background: #1a1a1a; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 8px; border: 1px solid #333; }
-        .energy-fill { background: var(--gold); height: 100%; width: 100%; transition: width 0.3s; }
+        .energy-box { width: 100%; max-width: 320px; padding-bottom: 90px; }
+        .energy-bar { background: #1a1a1a; height: 10px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .energy-fill { background: var(--gold); height: 100%; width: 100%; transition: width 0.2s; }
 
-        nav { display: flex; justify-content: space-around; background: #080808; padding: 18px 0; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; }
-        nav div { font-size: 10px; color: #444; font-weight: 700; }
+        nav { display: flex; justify-content: space-around; background: #080808; padding: 22px 0; border-top: 1px solid #1a1a1a; position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        nav div { font-size: 11px; color: #444; font-weight: 700; }
         nav .active { color: var(--gold); }
+
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-120px) scale(1.2); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -43,144 +45,151 @@
     <div id="game-page" class="page active-page">
         <div class="header" id="league-name">Bronze League</div>
         <div class="score-container">💰 <span id="balance-val">0</span></div>
-        
-        <div class="coin-section" id="click-area">
-            <div class="coin-card" id="coin">
-                <img src="https://githubusercontent.com" class="coin-img">
-            </div>
-        </div>
-
+        <div class="coin-card" id="click-area"><img src="https://vercel.app" class="coin-img"></div>
         <div class="energy-box">
             <div style="display: flex; justify-content: space-between; font-size: 13px;">
                 <span>⚡️ <span id="energy-val">1000</span> / <span id="max-energy-val">1000</span></span>
-                <span id="mult-status" style="color: #62b1f6; font-weight: bold;">X1</span>
+                <span id="pps-val" style="color: var(--star);">+0/s</span>
             </div>
             <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
         </div>
     </div>
 
     <div id="boosts-page" class="page">
-        <h2 style="color: var(--gold)">Магазин (Месяц до 1M)</h2>
+        <div class="premium-card">
+            <div><b style="color: var(--star)">Turbo Miner X2</b><br><small>Удвоить автокликер</small></div>
+            <button class="btn-star" onclick="buyStars()">⭐ 300</button>
+        </div>
         
-        <!-- Обычные бусты -->
-        <div class="list-item">
-            <div class="item-info"><b>Multitap</b><small>+1 за клик | Lvl <span id="mt-lvl">1</span></small></div>
-            <button class="btn-buy" onclick="buyMT()" id="mt-btn">1k</button>
+        <div style="width: 100%; background: #111; padding: 15px; border-radius: 20px; border: 1px solid #222; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <div><b>Multitap</b><br><small>Lvl <span id="mt-lvl">1</span></small></div>
+                <button class="btn-buy" id="mt-btn" onclick="buy('mt')">500</button>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <div><b>Robot</b><br><small>Lvl <span id="rm-lvl">0</span></small></div>
+                <button class="btn-buy" id="rm-btn" onclick="buy('rm')">5000</button>
+            </div>
         </div>
-        <div class="list-item">
-            <div class="item-info"><b>Energy Limit</b><small>+500 лимит</small></div>
-            <button class="btn-buy" onclick="buyEL()" id="el-btn">2.5k</button>
-        </div>
-
-        <h3 style="color: var(--star); margin-top: 20px;">Premium (Stars)</h3>
-        <div class="list-item">
-            <div class="item-info"><b>Ускорение X2</b><small>Навсегда</small></div>
-            <button class="btn-stars" onclick="buyStars(100, 2)">⭐ 100</button>
-        </div>
-        <div class="list-item">
-            <div class="item-info"><b>Ускорение X5</b><small>Навсегда</small></div>
-            <button class="btn-stars" onclick="buyStars(200, 5)">⭐ 200</button>
-        </div>
+        <p style="color: #444; font-size: 11px; margin-top: 15px; text-align: center;">Цена бустов растет в 2.8 раза за уровень</p>
     </div>
 
-    <div id="friends-page" class="page">
-        <h2>Друзья</h2>
-        <button class="btn-buy" style="width:100%" onclick="tg.openTelegramLink('https://t.me' + tg.initDataUnsafe.user.id)">Пригласить друга (+10%)</button>
+    <div id="leader-page" class="page">
+        <h2 style="color: var(--gold)">Top Players</h2>
+        <div style="width: 100%; background: #111; border-radius: 20px; padding: 10px; border: 1px solid #222;" id="leader-list">
+            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
+                <span style="color: var(--gold)">1</span><span>@CryptoBoss</span><b>2.4M</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
+                <span style="color: var(--gold)">2</span><span>@DogeLover</span><b>1.1M</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(243,186,47,0.1); border-radius: 12px;">
+                <span style="color: var(--gold)">YOU</span><span id="u-name">Player</span><b id="u-score">0</b>
+            </div>
+        </div>
     </div>
 
     <nav>
         <div onclick="showPage('game-page', this)" class="active">ИГРА</div>
         <div onclick="showPage('boosts-page', this)">БУСТЫ</div>
-        <div onclick="showPage('friends-page', this)">ДРУЗЬЯ</div>
+        <div onclick="showPage('leader-page', this)">ТОП</div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        if(tg.initDataUnsafe.user) document.getElementById('u-name').innerText = tg.initDataUnsafe.user.first_name;
 
-        let data = JSON.parse(localStorage.getItem('bitclick_hc')) || {
-            balance: 0, energy: 1000, maxEnergy: 1000, mt: 1, multiplier: 1, league: "Bronze"
+        let data = JSON.parse(localStorage.getItem('bitclick_v4')) || {
+            balance: 0, energy: 1000, maxEnergy: 1000, mt: 1, rm: 0, 
+            lvls: { mt: 1, rm: 0 }, multiplier: 1, leagueIdx: 0
         };
 
         function updateUI() {
             document.getElementById('balance-val').innerText = Math.floor(data.balance).toLocaleString();
             document.getElementById('energy-val').innerText = Math.floor(data.energy);
             document.getElementById('max-energy-val').innerText = data.maxEnergy;
+            document.getElementById('pps-val').innerText = `+${(data.rm * data.multiplier).toFixed(1)}/s`;
             document.getElementById('energy-fill').style.width = (data.energy / data.maxEnergy * 100) + '%';
-            document.getElementById('mt-lvl').innerText = data.mt;
-            document.getElementById('mult-status').innerText = "X" + data.multiplier;
+            document.getElementById('u-score').innerText = Math.floor(data.balance).toLocaleString();
             
-            // Цены
-            document.getElementById('mt-btn').innerText = (data.mt * 1000).toLocaleString();
-            document.getElementById('el-btn').innerText = (data.maxEnergy * 5).toLocaleString();
+            ['mt', 'rm'].forEach(type => {
+                const price = Math.floor({mt:500, rm:5000}[type] * Math.pow(2.8, data.lvls[type]));
+                const btn = document.getElementById(type + '-btn');
+                btn.innerText = price > 1000 ? (price/1000).toFixed(1)+'k' : price;
+                btn.disabled = data.balance < price;
+                document.getElementById(type + '-lvl').innerText = data.lvls[type];
+            });
 
-            // 10 Лиг (Растянуто)
-            const leagues = ["Bronze", "Silver", "Gold", "Platinum", "Sapphire", "Emerald", "Ruby", "Diamond", "Master", "Legend"];
-            const steps =;
-            let currentL = "Bronze League";
-            steps.forEach((s, i) => { if(data.balance >= s) currentL = leagues[i+1] + " League"; });
-            
-            if(data.league !== currentL) {
-                data.league = currentL;
-                confetti({ particleCount: 100, spread: 60, colors: ['#f3ba2f'] });
-            }
-            document.getElementById('league-name').innerText = data.league;
-            localStorage.setItem('bitclick_hc', JSON.stringify(data));
+            localStorage.setItem('bitclick_v4', JSON.stringify(data));
         }
 
+        // Клик с шансом X10
         document.getElementById('click-area').addEventListener('touchstart', (e) => {
             e.preventDefault();
             for (let i = 0; i < e.targetTouches.length; i++) {
                 if (data.energy >= data.mt) {
-                    const val = data.mt * data.multiplier;
+                    let isCrit = Math.random() < 0.03; // 3% шанс
+                    let val = isCrit ? data.mt * 10 : data.mt;
+                    
                     data.balance += val;
                     data.energy -= data.mt;
-                    showTapEffect(e.targetTouches[i].clientX, e.targetTouches[i].clientY, val);
+                    
+                    showTap(e.targetTouches[i].clientX, e.targetTouches[i].clientY, val, isCrit);
+                    
+                    if(tg.HapticFeedback) {
+                        isCrit ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.impactOccurred('light');
+                    }
                 }
             }
             updateUI();
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         });
 
-        function showTapEffect(x, y, v) {
+        function showTap(x, y, v, crit) {
             const n = document.createElement('div');
-            n.style.position = 'absolute'; n.style.left = x + 'px'; n.style.top = y + 'px';
-            n.style.fontSize = '24px'; n.style.fontWeight = '900'; n.style.color = '#fff';
-            n.innerText = '+' + v; n.style.animation = 'floatUp 0.8s forwards';
+            n.className = 'tap-msg' + (crit ? ' crit-msg' : '');
+            n.style.left = x + 'px'; n.style.top = y + 'px';
+            n.style.fontSize = crit ? '45px' : '30px';
+            n.innerText = (crit ? '🔥 CRIT +' : '+') + v;
             document.body.appendChild(n);
-            setTimeout(() => n.remove(), 800);
+            setTimeout(() => n.remove(), 700);
         }
 
-        // Покупки
-        function buyMT() {
-            let cost = data.mt * 1000;
-            if(data.balance >= cost) { data.balance -= cost; data.mt++; updateUI(); }
-        }
-        function buyEL() {
-            let cost = data.maxEnergy * 5;
-            if(data.balance >= cost) { data.balance -= cost; data.maxEnergy += 500; updateUI(); }
-        }
-        function buyStars(stars, mult) {
-            tg.showAlert(`Функция оплаты ${stars} Stars будет доступна после подключения платежей в BotFather!`);
-            // Для теста можно просто применить:
-            // data.multiplier = mult; updateUI();
+        function buy(type) {
+            const price = Math.floor({mt:500, rm:5000}[type] * Math.pow(2.8, data.lvls[type]));
+            if (data.balance >= price) {
+                data.balance -= price;
+                data.lvls[type]++;
+                if(type==='mt') data.mt++;
+                if(type==='rm') data.rm += 1;
+                updateUI();
+            }
         }
 
-        // Таймер (Медленный: +1 энергия в сек)
-        setInterval(() => {
-            if(data.energy < data.maxEnergy) data.energy++;
-            updateUI();
-        }, 1000);
+        function buyStars() {
+            tg.showConfirm("Купить Turbo X2 за 300 Stars?", (ok) => {
+                if(ok) {
+                    data.multiplier = 2;
+                    confetti({ particleCount: 200, colors: ['#62b1f6', '#ffffff'] });
+                    updateUI();
+                }
+            });
+        }
 
-        function showPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
+        function showPage(p, el) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
+            document.getElementById(p).classList.add('active-page');
             document.querySelectorAll('nav div').forEach(d => d.classList.remove('active'));
             el.classList.add('active');
         }
 
+        setInterval(() => {
+            if (data.energy < data.maxEnergy) data.energy = Math.min(data.maxEnergy, data.energy + 2.5);
+            if (data.rm > 0) data.balance += (data.rm * data.multiplier) / 10;
+            updateUI();
+        }, 100);
+
         updateUI();
     </script>
-    <style> @keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } } </style>
 </body>
 </html>
