@@ -3,209 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BitClick Elite</title>
+    <title>BitClick Hardcore</title>
     <script src="https://telegram.org"></script>
-    <script src="https://jsdelivr.net"></script>
     <style>
-        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; --card: #111; }
+        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; --card: #1a1a1a; }
         body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; height: 100vh; overflow: hidden; user-select: none; touch-action: manipulation; }
         
-        .header { padding: 15px; text-align: center; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .score-container { font-size: 42px; font-weight: 900; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        .page { display: none; flex-direction: column; align-items: center; height: 82vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .active-page { display: flex; }
-
-        /* Coin */
-        .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
-        .coin-card { width: 240px; height: 240px; transition: transform 0.05s; z-index: 10; cursor: pointer; }
-        .coin-card:active { transform: scale(0.92); }
-        .coin-img { width: 100%; pointer-events: none; filter: drop-shadow(0 0 30px rgba(243, 186, 47, 0.5)); }
-
-        /* Shop items */
-        .list-item { background: var(--card); padding: 15px; margin: 8px 0; border-radius: 18px; width: 100%; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; box-sizing: border-box; }
-        .item-info b { display: block; color: var(--gold); font-size: 15px; }
-        .item-info small { color: #777; font-size: 11px; }
-        
-        .btn-buy { background: var(--gold); color: #000; padding: 10px 16px; border-radius: 12px; font-weight: 800; border: none; min-width: 80px; }
-        .btn-buy:disabled { background: #333; color: #666; }
-        .btn-star { background: var(--star); color: #fff; padding: 12px; border-radius: 15px; font-weight: 800; border: none; width: 100%; margin-bottom: 15px; }
-
-        .energy-box { width: 100%; max-width: 320px; padding-bottom: 90px; }
-        .energy-bar { background: #1a1a1a; height: 12px; border-radius: 10px; margin-top: 8px; overflow: hidden; border: 1px solid #333; }
-        .energy-fill { background: var(--gold); height: 100%; width: 100%; transition: width 0.2s; }
-
-        nav { display: flex; justify-content: space-around; background: #080808; padding: 22px 0; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; z-index: 100; }
-        nav div { font-size: 11px; color: #555; font-weight: 700; text-align: center; cursor: pointer; }
+        /* Кнопки навигации */
+        nav { display: flex; justify-content: space-around; background: #0a0a0a; padding: 20px 0; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; z-index: 1000; }
+        nav div { font-size: 12px; color: #555; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         nav .active { color: var(--gold); }
 
-        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+        .page { display: none; flex-direction: column; align-items: center; height: 85vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .active-page { display: flex; }
+
+        .header { color: var(--gold); font-weight: bold; margin-top: 10px; letter-spacing: 1px; }
+        .score { font-size: 45px; font-weight: 900; margin: 10px 0; }
+
+        /* Монета на CSS (если картинка не грузится) */
+        .coin-wrapper { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .coin { 
+            width: 200px; height: 200px; background: linear-gradient(135deg, #f3ba2f, #ffd700); 
+            border-radius: 50%; border: 8px solid #b8860b; box-shadow: 0 0 40px rgba(243, 186, 47, 0.5);
+            display: flex; align-items: center; justify-content: center; font-size: 80px; cursor: pointer;
+            transition: transform 0.05s;
+        }
+        .coin:active { transform: scale(0.9); }
+
+        /* Бусты */
+        .item { background: var(--card); padding: 15px; margin: 8px 0; border-radius: 15px; width: 100%; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .btn { background: var(--gold); color: #000; padding: 10px 15px; border-radius: 10px; font-weight: bold; border: none; }
+        .btn:disabled { background: #444; color: #888; }
+
+        .energy-box { width: 100%; padding-bottom: 80px; }
+        .bar { background: #222; height: 12px; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .fill { background: var(--gold); height: 100%; width: 100%; transition: width 0.2s; }
+
+        @keyframes fly { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div id="game-page" class="page active-page">
-        <div class="header" id="league-name">Bronze League</div>
-        <div class="score-container">💰 <span id="balance-val">0</span></div>
-        <div class="coin-section">
-            <div class="coin-card" id="click-area">
-                <img src="https://ibb.co" class="coin-img">
-            </div>
+    <!-- Страница ИГРА -->
+    <div id="p-game" class="page active-page">
+        <div class="header" id="l-name">BRONZE LEAGUE</div>
+        <div class="score">💰 <span id="val-b">0</span></div>
+        <div class="coin-wrapper">
+            <div class="coin" id="coin-btn">₿</div>
         </div>
         <div class="energy-box">
-            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;">
-                <span>⚡️ <span id="energy-val">1000</span> / <span id="max-energy-val">1000</span></span>
-                <span id="pps-val" style="color: var(--star);">+0/s</span>
+            <div style="display:flex; justify-content:space-between; font-size:14px;">
+                <span>⚡️ <span id="val-e">1000</span>/<span id="val-me">1000</span></span>
+                <span id="val-pps" style="color:var(--star)">+0/s</span>
             </div>
-            <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
+            <div class="bar"><div id="e-fill" class="fill"></div></div>
         </div>
     </div>
 
-    <div id="boosts-page" class="page">
-        <button class="btn-star" onclick="buyPremium()">⭐ Ускорение Автокликера X2 (300 Stars)</button>
-        
-        <div class="list-item">
-            <div class="item-info"><b>Multitap</b><small>Lvl <span id="mt-lvl">1</span></small></div>
-            <button class="btn-buy" id="mt-btn" onclick="buyBoost('mt')">500</button>
+    <!-- Страница БУСТЫ -->
+    <div id="p-boost" class="page">
+        <h2 style="color:var(--gold)">Магазин</h2>
+        <div class="item">
+            <div><b>Multitap</b><br><small>Lvl <span id="l-mt">1</span></small></div>
+            <button class="btn" onclick="buy('mt')" id="b-mt">500</button>
         </div>
-        <div class="list-item">
-            <div class="item-info"><b>Energy Cap</b><small>Lvl <span id="el-lvl">1</span></small></div>
-            <button class="btn-buy" id="el-btn" onclick="buyBoost('el')">1000</button>
+        <div class="item">
+            <div><b>Energy Cap</b><br><small>Lvl <span id="l-el">1</span></small></div>
+            <button class="btn" onclick="buy('el')" id="b-el">1000</button>
         </div>
-        <div class="list-item">
-            <div class="item-info"><b>Robot Miner</b><small>Lvl <span id="rm-lvl">0</span></small></div>
-            <button class="btn-buy" id="rm-btn" onclick="buyBoost('rm')">5000</button>
+        <div class="item">
+            <div><b>Robot</b><br><small>Lvl <span id="l-rm">0</span></small></div>
+            <button class="btn" onclick="buy('rm')" id="b-rm">5000</button>
         </div>
+        <button class="btn" style="background:var(--star); width:100%; margin-top:10px;" onclick="alert('Stars payment soon!')">⭐ Turbo X2 (300 Stars)</button>
     </div>
 
-    <div id="friends-page" class="page">
-        <h2 style="color: var(--gold)">Друзья</h2>
-        <div style="background: #111; padding: 20px; border-radius: 20px; width: 100%; text-align: center; border: 1px solid #222; box-sizing: border-box;">
-            <p>Приглашай друзей в @BitClick_cryptobot и получай бонусы!</p>
-            <button class="btn-buy" style="width: 100%; padding: 15px;" onclick="invite()">Пригласить друга</button>
+    <!-- Страница ДРУЗЬЯ и ТОП -->
+    <div id="p-friends" class="page">
+        <h2>Друзья и Топ</h2>
+        <button class="btn" style="width:100%" onclick="window.open('https://t.me')">Пригласить</button>
+        <div style="width:100%; margin-top:20px; background:#111; border-radius:15px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
+                <span>1. @CryptoKing</span><b>1.5M</b>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:10px; color:var(--gold)">
+                <span>ВЫ</span><b id="my-score">0</b>
+            </div>
         </div>
     </div>
 
     <nav>
-        <div onclick="showPage('game-page', this)" class="active">ИГРА</div>
-        <div onclick="showPage('boosts-page', this)">БУСТЫ</div>
-        <div onclick="showPage('friends-page', this)">ДРУЗЬЯ</div>
+        <div onclick="tab('p-game', this)" class="active">Игра</div>
+        <div onclick="tab('p-boost', this)">Бусты</div>
+        <div onclick="tab('p-friends', this)">Друзья</div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let data = JSON.parse(localStorage.getItem('bitclick_final_v5')) || {
-            balance: 0, energy: 1000, maxEnergy: 1000, mt: 1, rm: 0, 
-            lvls: { mt: 1, el: 1, rm: 0 }, multiplier: 1, leagueIdx: 0
+        let s = JSON.parse(localStorage.getItem('bc_v10')) || {
+            b: 0, e: 1000, me: 1000, mt: 1, rm: 0,
+            lv: { mt: 1, el: 1, rm: 0 }
         };
 
-        const leagues = [
-            {n: "Bronze", m: 0}, {n: "Silver", m: 15000}, 
-            {n: "Gold", m: 100000}, {n: "Platinum", m: 500000}, 
-            {n: "Diamond", m: 1000000}
-        ];
-
-        function updateUI() {
-            document.getElementById('balance-val').innerText = Math.floor(data.balance).toLocaleString();
-            document.getElementById('energy-val').innerText = Math.floor(data.energy);
-            document.getElementById('max-energy-val').innerText = data.maxEnergy;
-            document.getElementById('pps-val').innerText = `+${(data.rm * data.multiplier).toFixed(1)}/s`;
-            document.getElementById('energy-fill').style.width = (data.energy / data.maxEnergy * 100) + '%';
+        function ui() {
+            document.getElementById('val-b').innerText = Math.floor(s.b).toLocaleString();
+            document.getElementById('my-score').innerText = Math.floor(s.b).toLocaleString();
+            document.getElementById('val-e').innerText = Math.floor(s.e);
+            document.getElementById('val-me').innerText = s.me;
+            document.getElementById('val-pps').innerText = '+' + s.rm + '/s';
+            document.getElementById('e-fill').style.width = (s.e / s.me * 100) + '%';
             
-            // Бусты
-            ['mt', 'el', 'rm'].forEach(type => {
-                const base = {mt: 500, el: 1000, rm: 5000}[type];
-                const price = Math.floor(base * Math.pow(2.8, data.lvls[type] - (type==='rm'?0:1)));
-                const btn = document.getElementById(type + '-btn');
-                btn.innerText = price > 1000 ? (price/1000).toFixed(1) + 'k' : price;
-                btn.disabled = data.balance < price;
-                document.getElementById(type + '-lvl').innerText = data.lvls[type];
+            // Бусты цены (рост в 2.8 раза)
+            ['mt', 'el', 'rm'].forEach(k => {
+                let p = Math.floor({mt:500, el:1000, rm:5000}[k] * Math.pow(2.8, s.lv[k] - (k==='rm'?0:1)));
+                let b = document.getElementById('b-'+k);
+                b.innerText = p.toLocaleString();
+                b.disabled = s.b < p;
+                document.getElementById('l-'+k).innerText = s.lv[k];
             });
 
             // Лиги
-            leagues.forEach((l, i) => {
-                if(data.balance >= l.m && i > data.leagueIdx) {
-                    data.leagueIdx = i;
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                }
-            });
-            document.getElementById('league-name').innerText = leagues[data.leagueIdx].n + " League";
+            let l = "BRONZE LEAGUE";
+            if(s.b > 15000) l = "SILVER LEAGUE";
+            if(s.b > 100000) l = "GOLD LEAGUE";
+            document.getElementById('l-name').innerText = l;
 
-            localStorage.setItem('bitclick_final_v5', JSON.stringify(data));
+            localStorage.setItem('bc_v10', JSON.stringify(s));
         }
 
         // Клик
-        const clickArea = document.getElementById('click-area');
-        clickArea.addEventListener('touchstart', (e) => {
+        document.getElementById('coin-btn').addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touches = e.targetTouches;
-            for (let i = 0; i < touches.length; i++) {
-                if (data.energy >= data.mt) {
-                    let isCrit = Math.random() < 0.03;
-                    let val = isCrit ? data.mt * 10 : data.mt;
-                    data.balance += val;
-                    data.energy -= data.mt;
-                    showTap(touches[i].clientX, touches[i].clientY, val, isCrit);
-                }
+            if (s.e >= s.mt) {
+                let crit = Math.random() < 0.03;
+                let v = crit ? s.mt * 10 : s.mt;
+                s.b += v;
+                s.e -= s.mt;
+                
+                // Текст +v
+                let n = document.createElement('div');
+                n.innerText = (crit ? '🔥 +' : '+') + v;
+                n.style.cssText = `position:fixed; left:${e.touches[0].clientX}px; top:${e.touches[0].clientY}px; font-size:30px; font-weight:bold; color:${crit?'#f3ba2f':'#fff'}; animation:fly 0.7s forwards; pointer-events:none; z-index:100;`;
+                document.body.appendChild(n);
+                setTimeout(() => n.remove(), 700);
+
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(crit ? 'heavy' : 'light');
             }
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            updateUI();
+            ui();
         });
 
-        function showTap(x, y, v, crit) {
-            const n = document.createElement('div');
-            n.style.cssText = `position:fixed; left:${x}px; top:${y}px; font-size:${crit?40:30}px; font-weight:900; color:${crit?'#f3ba2f':'#fff'}; pointer-events:none; animation:floatUp 0.7s forwards; z-index:999;`;
-            n.innerText = (crit ? '🔥 +' : '+') + v;
-            document.body.appendChild(n);
-            setTimeout(() => n.remove(), 700);
-        }
-
-        function buyBoost(type) {
-            const base = {mt: 500, el: 1000, rm: 5000}[type];
-            const price = Math.floor(base * Math.pow(2.8, data.lvls[type] - (type==='rm'?0:1)));
-            
-            if (data.balance >= price) {
-                data.balance -= price;
-                data.lvls[type]++;
-                if(type === 'mt') data.mt++;
-                if(type === 'el') data.maxEnergy += 500;
-                if(type === 'rm') data.rm += 1;
-                updateUI();
+        function buy(k) {
+            let p = Math.floor({mt:500, el:1000, rm:5000}[k] * Math.pow(2.8, s.lv[k] - (k==='rm'?0:1)));
+            if (s.b >= p) {
+                s.b -= p;
+                s.lv[k]++;
+                if(k==='mt') s.mt++;
+                if(k==='el') { s.me += 500; s.e = s.me; }
+                if(k==='rm') s.rm++;
+                ui();
             }
         }
 
-        function buyPremium() {
-            tg.showConfirm("Активировать Turbo X2 за 300 Stars?", (ok) => {
-                if(ok) {
-                    data.multiplier = 2;
-                    confetti({ particleCount: 200, colors: ['#62b1f6'] });
-                    updateUI();
-                }
-            });
-        }
-
-        function invite() {
-            const url = `https://t.me в BitClick и начни майнить!`;
-            tg.openTelegramLink(url);
-        }
-
-        function showPage(p, el) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active-page'));
-            document.getElementById(p).classList.add('active-page');
+        function tab(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
             document.querySelectorAll('nav div').forEach(d => d.classList.remove('active'));
             el.classList.add('active');
         }
 
-        // Цикл (Энергия + Робот)
+        // Цикл (Реген 2/сек + Майнинг)
         setInterval(() => {
-            if (data.energy < data.maxEnergy) data.energy = Math.min(data.maxEnergy, data.energy + 2);
-            if (data.rm > 0) data.balance += (data.rm * data.multiplier) / 10;
-            updateUI();
+            if (s.e < s.me) s.e = Math.min(s.me, s.e + 2);
+            if (s.rm > 0) s.b += s.rm / 10;
+            ui();
         }, 100);
 
-        updateUI();
+        ui();
     </script>
 </body>
 </html>
