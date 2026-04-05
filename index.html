@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BitClick Hardcore Elite</title>
+    <title>BitClick Elite</title>
     <script src="https://telegram.org"></script>
     <script src="https://jsdelivr.net"></script>
     <style>
-        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; --card: #111; --crit: #ff4500; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; user-select: none; touch-action: manipulation; }
+        :root { --gold: #f3ba2f; --bg: #000; --star: #62b1f6; --card: #111; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; height: 100vh; overflow: hidden; user-select: none; touch-action: manipulation; }
         
-        .header { padding: 12px; text-align: center; color: var(--gold); font-weight: 800; font-size: 13px; text-transform: uppercase; }
-        .score-container { font-size: 38px; font-weight: 900; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .header { padding: 15px; text-align: center; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .score-container { font-size: 42px; font-weight: 900; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        .page { display: none; flex-direction: column; align-items: center; height: 82vh; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .page { display: none; flex-direction: column; align-items: center; height: 82vh; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .active-page { display: flex; }
 
-        .coin-card { width: 230px; height: 230px; transition: transform 0.05s; margin: auto; position: relative; }
-        .coin-card:active { transform: scale(0.90); }
-        .coin-img { width: 100%; pointer-events: none; filter: drop-shadow(0 0 30px rgba(243, 186, 47, 0.4)); }
+        /* Coin */
+        .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+        .coin-card { width: 240px; height: 240px; transition: transform 0.05s; z-index: 10; cursor: pointer; }
+        .coin-card:active { transform: scale(0.92); }
+        .coin-img { width: 100%; pointer-events: none; filter: drop-shadow(0 0 30px rgba(243, 186, 47, 0.5)); }
 
-        /* Эффекты тапа */
-        .tap-msg { position: fixed; font-weight: 900; pointer-events: none; z-index: 100; animation: floatUp 0.7s forwards; }
-        .crit-msg { color: var(--gold); font-size: 40px; text-shadow: 0 0 15px var(--crit); }
-
-        .premium-card { background: linear-gradient(135deg, #111, #0a1520); border: 1px solid var(--star); padding: 15px; border-radius: 20px; width: 100%; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        /* Shop items */
+        .list-item { background: var(--card); padding: 15px; margin: 8px 0; border-radius: 18px; width: 100%; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; box-sizing: border-box; }
+        .item-info b { display: block; color: var(--gold); font-size: 15px; }
+        .item-info small { color: #777; font-size: 11px; }
         
         .btn-buy { background: var(--gold); color: #000; padding: 10px 16px; border-radius: 12px; font-weight: 800; border: none; min-width: 80px; }
-        .btn-star { background: var(--star); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 800; border: none; display: flex; align-items: center; gap: 4px; }
+        .btn-buy:disabled { background: #333; color: #666; }
+        .btn-star { background: var(--star); color: #fff; padding: 12px; border-radius: 15px; font-weight: 800; border: none; width: 100%; margin-bottom: 15px; }
 
         .energy-box { width: 100%; max-width: 320px; padding-bottom: 90px; }
-        .energy-bar { background: #1a1a1a; height: 10px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .energy-bar { background: #1a1a1a; height: 12px; border-radius: 10px; margin-top: 8px; overflow: hidden; border: 1px solid #333; }
         .energy-fill { background: var(--gold); height: 100%; width: 100%; transition: width 0.2s; }
 
-        nav { display: flex; justify-content: space-around; background: #080808; padding: 22px 0; border-top: 1px solid #1a1a1a; position: fixed; bottom: 0; width: 100%; z-index: 100; }
-        nav div { font-size: 11px; color: #444; font-weight: 700; }
+        nav { display: flex; justify-content: space-around; background: #080808; padding: 22px 0; border-top: 1px solid #222; position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        nav div { font-size: 11px; color: #555; font-weight: 700; text-align: center; cursor: pointer; }
         nav .active { color: var(--gold); }
 
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-120px) scale(1.2); opacity: 0; } }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -45,9 +47,13 @@
     <div id="game-page" class="page active-page">
         <div class="header" id="league-name">Bronze League</div>
         <div class="score-container">💰 <span id="balance-val">0</span></div>
-        <div class="coin-card" id="click-area"><img src="https://vercel.app" class="coin-img"></div>
+        <div class="coin-section">
+            <div class="coin-card" id="click-area">
+                <img src="https://ibb.co" class="coin-img">
+            </div>
+        </div>
         <div class="energy-box">
-            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;">
                 <span>⚡️ <span id="energy-val">1000</span> / <span id="max-energy-val">1000</span></span>
                 <span id="pps-val" style="color: var(--star);">+0/s</span>
             </div>
@@ -56,54 +62,50 @@
     </div>
 
     <div id="boosts-page" class="page">
-        <div class="premium-card">
-            <div><b style="color: var(--star)">Turbo Miner X2</b><br><small>Удвоить автокликер</small></div>
-            <button class="btn-star" onclick="buyStars()">⭐ 300</button>
-        </div>
+        <button class="btn-star" onclick="buyPremium()">⭐ Ускорение Автокликера X2 (300 Stars)</button>
         
-        <div style="width: 100%; background: #111; padding: 15px; border-radius: 20px; border: 1px solid #222; box-sizing: border-box;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                <div><b>Multitap</b><br><small>Lvl <span id="mt-lvl">1</span></small></div>
-                <button class="btn-buy" id="mt-btn" onclick="buy('mt')">500</button>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-                <div><b>Robot</b><br><small>Lvl <span id="rm-lvl">0</span></small></div>
-                <button class="btn-buy" id="rm-btn" onclick="buy('rm')">5000</button>
-            </div>
+        <div class="list-item">
+            <div class="item-info"><b>Multitap</b><small>Lvl <span id="mt-lvl">1</span></small></div>
+            <button class="btn-buy" id="mt-btn" onclick="buyBoost('mt')">500</button>
         </div>
-        <p style="color: #444; font-size: 11px; margin-top: 15px; text-align: center;">Цена бустов растет в 2.8 раза за уровень</p>
+        <div class="list-item">
+            <div class="item-info"><b>Energy Cap</b><small>Lvl <span id="el-lvl">1</span></small></div>
+            <button class="btn-buy" id="el-btn" onclick="buyBoost('el')">1000</button>
+        </div>
+        <div class="list-item">
+            <div class="item-info"><b>Robot Miner</b><small>Lvl <span id="rm-lvl">0</span></small></div>
+            <button class="btn-buy" id="rm-btn" onclick="buyBoost('rm')">5000</button>
+        </div>
     </div>
 
-    <div id="leader-page" class="page">
-        <h2 style="color: var(--gold)">Top Players</h2>
-        <div style="width: 100%; background: #111; border-radius: 20px; padding: 10px; border: 1px solid #222;" id="leader-list">
-            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
-                <span style="color: var(--gold)">1</span><span>@CryptoBoss</span><b>2.4M</b>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #222;">
-                <span style="color: var(--gold)">2</span><span>@DogeLover</span><b>1.1M</b>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 12px; background: rgba(243,186,47,0.1); border-radius: 12px;">
-                <span style="color: var(--gold)">YOU</span><span id="u-name">Player</span><b id="u-score">0</b>
-            </div>
+    <div id="friends-page" class="page">
+        <h2 style="color: var(--gold)">Друзья</h2>
+        <div style="background: #111; padding: 20px; border-radius: 20px; width: 100%; text-align: center; border: 1px solid #222; box-sizing: border-box;">
+            <p>Приглашай друзей в @BitClick_cryptobot и получай бонусы!</p>
+            <button class="btn-buy" style="width: 100%; padding: 15px;" onclick="invite()">Пригласить друга</button>
         </div>
     </div>
 
     <nav>
         <div onclick="showPage('game-page', this)" class="active">ИГРА</div>
         <div onclick="showPage('boosts-page', this)">БУСТЫ</div>
-        <div onclick="showPage('leader-page', this)">ТОП</div>
+        <div onclick="showPage('friends-page', this)">ДРУЗЬЯ</div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        if(tg.initDataUnsafe.user) document.getElementById('u-name').innerText = tg.initDataUnsafe.user.first_name;
 
-        let data = JSON.parse(localStorage.getItem('bitclick_v4')) || {
+        let data = JSON.parse(localStorage.getItem('bitclick_final_v5')) || {
             balance: 0, energy: 1000, maxEnergy: 1000, mt: 1, rm: 0, 
-            lvls: { mt: 1, rm: 0 }, multiplier: 1, leagueIdx: 0
+            lvls: { mt: 1, el: 1, rm: 0 }, multiplier: 1, leagueIdx: 0
         };
+
+        const leagues = [
+            {n: "Bronze", m: 0}, {n: "Silver", m: 15000}, 
+            {n: "Gold", m: 100000}, {n: "Platinum", m: 500000}, 
+            {n: "Diamond", m: 1000000}
+        ];
 
         function updateUI() {
             document.getElementById('balance-val').innerText = Math.floor(data.balance).toLocaleString();
@@ -111,69 +113,82 @@
             document.getElementById('max-energy-val').innerText = data.maxEnergy;
             document.getElementById('pps-val').innerText = `+${(data.rm * data.multiplier).toFixed(1)}/s`;
             document.getElementById('energy-fill').style.width = (data.energy / data.maxEnergy * 100) + '%';
-            document.getElementById('u-score').innerText = Math.floor(data.balance).toLocaleString();
             
-            ['mt', 'rm'].forEach(type => {
-                const price = Math.floor({mt:500, rm:5000}[type] * Math.pow(2.8, data.lvls[type]));
+            // Бусты
+            ['mt', 'el', 'rm'].forEach(type => {
+                const base = {mt: 500, el: 1000, rm: 5000}[type];
+                const price = Math.floor(base * Math.pow(2.8, data.lvls[type] - (type==='rm'?0:1)));
                 const btn = document.getElementById(type + '-btn');
-                btn.innerText = price > 1000 ? (price/1000).toFixed(1)+'k' : price;
+                btn.innerText = price > 1000 ? (price/1000).toFixed(1) + 'k' : price;
                 btn.disabled = data.balance < price;
                 document.getElementById(type + '-lvl').innerText = data.lvls[type];
             });
 
-            localStorage.setItem('bitclick_v4', JSON.stringify(data));
+            // Лиги
+            leagues.forEach((l, i) => {
+                if(data.balance >= l.m && i > data.leagueIdx) {
+                    data.leagueIdx = i;
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            });
+            document.getElementById('league-name').innerText = leagues[data.leagueIdx].n + " League";
+
+            localStorage.setItem('bitclick_final_v5', JSON.stringify(data));
         }
 
-        // Клик с шансом X10
-        document.getElementById('click-area').addEventListener('touchstart', (e) => {
+        // Клик
+        const clickArea = document.getElementById('click-area');
+        clickArea.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            for (let i = 0; i < e.targetTouches.length; i++) {
+            const touches = e.targetTouches;
+            for (let i = 0; i < touches.length; i++) {
                 if (data.energy >= data.mt) {
-                    let isCrit = Math.random() < 0.03; // 3% шанс
+                    let isCrit = Math.random() < 0.03;
                     let val = isCrit ? data.mt * 10 : data.mt;
-                    
                     data.balance += val;
                     data.energy -= data.mt;
-                    
-                    showTap(e.targetTouches[i].clientX, e.targetTouches[i].clientY, val, isCrit);
-                    
-                    if(tg.HapticFeedback) {
-                        isCrit ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.impactOccurred('light');
-                    }
+                    showTap(touches[i].clientX, touches[i].clientY, val, isCrit);
                 }
             }
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             updateUI();
         });
 
         function showTap(x, y, v, crit) {
             const n = document.createElement('div');
-            n.className = 'tap-msg' + (crit ? ' crit-msg' : '');
-            n.style.left = x + 'px'; n.style.top = y + 'px';
-            n.style.fontSize = crit ? '45px' : '30px';
-            n.innerText = (crit ? '🔥 CRIT +' : '+') + v;
+            n.style.cssText = `position:fixed; left:${x}px; top:${y}px; font-size:${crit?40:30}px; font-weight:900; color:${crit?'#f3ba2f':'#fff'}; pointer-events:none; animation:floatUp 0.7s forwards; z-index:999;`;
+            n.innerText = (crit ? '🔥 +' : '+') + v;
             document.body.appendChild(n);
             setTimeout(() => n.remove(), 700);
         }
 
-        function buy(type) {
-            const price = Math.floor({mt:500, rm:5000}[type] * Math.pow(2.8, data.lvls[type]));
+        function buyBoost(type) {
+            const base = {mt: 500, el: 1000, rm: 5000}[type];
+            const price = Math.floor(base * Math.pow(2.8, data.lvls[type] - (type==='rm'?0:1)));
+            
             if (data.balance >= price) {
                 data.balance -= price;
                 data.lvls[type]++;
-                if(type==='mt') data.mt++;
-                if(type==='rm') data.rm += 1;
+                if(type === 'mt') data.mt++;
+                if(type === 'el') data.maxEnergy += 500;
+                if(type === 'rm') data.rm += 1;
                 updateUI();
             }
         }
 
-        function buyStars() {
-            tg.showConfirm("Купить Turbo X2 за 300 Stars?", (ok) => {
+        function buyPremium() {
+            tg.showConfirm("Активировать Turbo X2 за 300 Stars?", (ok) => {
                 if(ok) {
                     data.multiplier = 2;
-                    confetti({ particleCount: 200, colors: ['#62b1f6', '#ffffff'] });
+                    confetti({ particleCount: 200, colors: ['#62b1f6'] });
                     updateUI();
                 }
             });
+        }
+
+        function invite() {
+            const url = `https://t.me в BitClick и начни майнить!`;
+            tg.openTelegramLink(url);
         }
 
         function showPage(p, el) {
@@ -183,8 +198,9 @@
             el.classList.add('active');
         }
 
+        // Цикл (Энергия + Робот)
         setInterval(() => {
-            if (data.energy < data.maxEnergy) data.energy = Math.min(data.maxEnergy, data.energy + 2.5);
+            if (data.energy < data.maxEnergy) data.energy = Math.min(data.maxEnergy, data.energy + 2);
             if (data.rm > 0) data.balance += (data.rm * data.multiplier) / 10;
             updateUI();
         }, 100);
