@@ -83,36 +83,3 @@
             document.body.appendChild(n);
             setTimeout(() => n.remove(), 700);
             
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            updateUI();
-        }
-    });
-
-    function buy(type) {
-        let cost = type === 'mt' ? Math.floor(500 * Math.pow(2.5, data.lv.mt - 1)) : Math.floor(1000 * Math.pow(2.5, data.lv.el - 1));
-        if (data.b >= cost) {
-            data.b -= cost;
-            if (type === 'mt') { data.lv.mt++; data.mt++; }
-            else { data.lv.el++; data.me += 500; data.e = data.me; }
-            updateUI();
-        }
-    }
-
-    function show(pId, nId) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('nav div').forEach(n => n.classList.remove('active-nav'));
-        document.getElementById(pId).classList.add('active');
-        document.getElementById(nId).classList.add('active-nav');
-    }
-
-    setInterval(() => {
-        if (data.e < data.me) { 
-            data.e = Math.min(data.me, data.e + 2); 
-            updateUI(); 
-        }
-    }, 1000);
-
-    updateUI();
-</script>
-</body>
-</html
