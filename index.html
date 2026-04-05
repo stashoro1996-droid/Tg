@@ -1,17 +1,104 @@
-s.mt) {
-                let 
-        function buy(k) {
-            let p = Math.floor({mt:500, el:1000, rm:5000}[k] * Math.pow(2.8, s.lv[k] - (k==='rm'?0:1)));
-            if (s.b >= p) {
-                s.b -= p;
-                s.lv[k]++;
-                if(k==='mt') s.mt++;
-                if(k==='el') { s.me += 500; s.e = s.me; }
-                if(k==='rm') s.rm++;
-                ui();
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BitClick</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; text-align: center; user-select: none; }
+        .page { display: none; padding: 20px; }
+        .active { display: block; }
+        .score { font-size: 40px; margin: 20px 0; color: #f3ba2f; }
+        .coin { width: 200px; height: 200px; background: radial-gradient(#f3ba2f, #b8860b); border-radius: 50%; margin: 40px auto; display: flex; align-items: center; justify-content: center; font-size: 80px; cursor: pointer; box-shadow: 0 0 20px rgba(243,186,47,0.5); }
+        .coin:active { transform: scale(0.95); }
+        nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; padding: 15px 0; border-top: 1px solid #333; }
+        nav div { flex: 1; color: #888; font-weight: bold; }
+        nav .active-nav { color: #f3ba2f; }
+        .btn { background: #f3ba2f; color: #000; padding: 15px; border-radius: 10px; margin: 10px; border: none; font-weight: bold; width: 80%; }
+        .btn:disabled { background: #444; color: #888; }
+        @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+    </style>
+</head>
+<body>
+
+    <div id="p1" class="page active">
+        <div class="score">💰 <span id="balance">0</span></div>
+        <div class="coin" id="tap-btn">₿</div>
+        <div style="margin-top: 20px;">⚡️ <span id="energy">1000</span> / <span id="max-e">1000</span></div>
+    </div>
+
+    <div id="p2" class="page">
+        <h2>Магазин</h2>
+        <button class="btn" onclick="buy('mt')">Улучшить тап: <span id="cost-mt">500</span></button><br>
+        <button class="btn" onclick="buy('el')">Больше энергии: <span id="cost-el">1000</span></button>
+    </div>
+
+    <nav>
+        <div id="n1" class="active-nav" onclick="show('p1', 'n1')">ИГРА</div>
+        <div id="n2" onclick="show('p2', 'n2')">БУСТЫ</div>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let data = JSON.parse(localStorage.getItem('bc_save')) || {
+            b: 0, e: 1000, me: 1000, mt: 1, lv: { mt: 1, el: 1 }
+        };
+
+        function updateUI() {
+            document.getElementById('balance').innerText = Math.floor(data.b);
+            document.getElementById('energy').innerText = Math.floor(data.e);
+            document.getElementById('max-e').innerText = data.me;
+            
+            let p_mt = Math.floor(500 * Math.pow(2.5, data.lv.mt - 1));
+            let p_el = Math.floor(1000 * Math.pow(2.5, data.lv.el - 1));
+            
+            document.getElementById('cost-mt').innerText = p_mt;
+            document.getElementById('cost-el').innerText = p_el;
+            localStorage.setItem('bc_save', JSON.stringify(data));
+        }
+
+        document.getElementById('tap-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (data.e >= data.mt) {
+                data.b += data.mt;
+                data.e -= data.mt;
+                
+                let n = document.createElement('div');
+                n.innerText = '+' + data.mt;
+                n.style.cssText = `position:fixed; left:${e.touches[0].clientX}px; top:${e.touches[0].clientY}px; font-size:30px; font-weight:bold; color:#fff; animation:fly 0.7s forwards; pointer-events:none;`;
+                document.body.appendChild(n);
+                setTimeout(() => n.remove(), 700);
+                
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                updateUI();
+            }
+        });
+
+        function buy(type) {
+            let cost = type === 'mt' ? Math.floor(500 * Math.pow(2.5, data.lv.mt - 1)) : Math.floor(1000 * Math.pow(2.5, data.lv.el - 1));
+            if (data.b >= cost) {
+                data.b -= cost;
+                if (type === 'mt') { data.lv.mt++; data.mt++; }
+                else { data.lv.el++; data.me += 500; data.e = data.me; }
+                updateUI();
             }
         }
 
-        function tab(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById
+        function show(pId, nId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav div').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById(pId).classList.add('active');
+            document.getElementById(nId).classList.add('active-nav');
+        }
+
+        setInterval(() => {
+            if (data.e < data.me) { data.e = Math.min(data.me, data.e + 2); updateUI(); }
+        }, 1000);
+
+        updateUI();
+    </script>
+</body>
+</html>
